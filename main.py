@@ -110,7 +110,9 @@ def has_overlap(board, shape):
         return False
 
 def board_complete(board):
-    N = (board & COMPLETE_BOARD_NUM) 
+    # Find the bits that are not flipped on
+    N = (~board & ~COMPLETE_BOARD_NUM) 
+    # if N is a power of 2 there is only one bit not flipped on which means the puzzle is complete
     if N & N-1  == 0:
         return True
     else:
@@ -174,14 +176,13 @@ def generate_shapes(shape):
             for j in range(0, shape_data["columns"]-1):
                 result.append(shape_data['shape'] * (2**i) * (2**(j*6)))
     
-    return set(result)  
+    return set(result)
 
 def print_results(results):
     for result in results: 
         print(result)
     print("\n")
 
-    
 # ------ Main Function ------
 def main():
     # Generate all possible shapes
@@ -195,10 +196,13 @@ def main():
 
     all_shapes = [l_shapes, hat_shapes, zig_zag_shapes, straight_shapes, cross_shapes, cube_ish_shapes, t_shapes]
 
-    for shape_types in all_shapes:
-        for shape in shape_types:
-            print_results(binary_to_array(shape))
+    result = []
+    
+    # Cartesian product of all shapes
 
+    # Generate all possible boards
+
+
+
+# ------ Running the Program ------
 main()
-
-# print(generate_shapes(t_shape))
