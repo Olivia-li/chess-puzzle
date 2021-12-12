@@ -1,6 +1,8 @@
 import numpy as np
 import itertools
 
+COMPLETE_BOARD_NUM = 68719476735
+
 # ----- Board + Shape Generation -----
 board = [
     [0, 0, 0, 0, 0, 0],
@@ -75,26 +77,6 @@ cube_ish = [
 ]
 
 
-# ----- Shape Generation Helper Functions -----
-def num_empty_array(shape):
-    count = 0
-    for row in shape:
-        if sum(row) == 0:
-            count += 1
-    return count
-
-def rot90(shape):
-    new_shape = np.rot90(shape)
-    new_shape = np.roll(new_shape, num_empty_array(new_shape), axis=0)
-    return new_shape
-
-
-def fliplr(shape):
-    shift_num = num_empty_array(np.rot90(shape))
-    new_shape = np.fliplr(shape)
-    new_shape = np.roll(new_shape, shift_num, axis=1)
-    return new_shape
-
 # ----- Data Type Conversions -----
 def array_to_binary(shape):
     flat_shape = list(itertools.chain(*shape))
@@ -126,3 +108,97 @@ def has_overlap(board, shape):
         return True
     else:
         return False
+
+def board_complete(board):
+    N = (board & COMPLETE_BOARD_NUM) 
+    if N & N-1  == 0:
+        return True
+    else:
+        return False
+
+# ----- Shape Generation Helper Functions -----
+def num_empty_rows(shape):
+    count = 0
+    for row in shape:
+        if sum(row) == 0:
+            count += 1
+    return count
+
+def num_empty_columns(shape):
+    count = 0
+    for i in range(0, 6):
+        if sum([j[i] for j in shape]) == 0:
+            count += 1
+    return count
+
+def rot90(shape):
+    new_shape = np.rot90(shape)
+    new_shape = np.roll(new_shape, num_empty_rows(new_shape), axis=0)
+    return new_shape
+
+
+def fliplr(shape):
+    new_shape = np.fliplr(shape)
+    new_shape = np.roll(new_shape, num_empty_columns(shape), axis=1)
+    return new_shape
+
+def generate_all_reflections_and_rotations(shape):
+    shapes = []
+    shapes.append(shape)
+    shapes.append(rot90(shape))
+    shapes.append(rot90(rot90(shape)))
+    shapes.append(rot90(rot90(rot90(shape))))
+    shapes.append(fliplr(shape))
+    shapes.append(fliplr(rot90(shape)))
+    shapes.append(fliplr(rot90(rot90(shape))))
+    shapes.append(fliplr(rot90(rot90(rot90(shape)))))
+    return shapes
+
+# ------ Generate all Possible Shapes ------
+def generate_shapes(shape):
+    all_shapes = generate_all_reflections_and_rotations(shape)
+
+    # Get rid of duplicates
+    all_shapes = set(map(lambda x: array_to_binary(x), all_shapes))
+    all_shapes = list(map(lambda x: binary_to_array(x), all_shapes))
+
+    # Get rows and columns for each shape
+    data = []
+    for shape in all_shapes:
+        data.append({"shape": array_to_binary(shape), "rows": num_empty_rows(shape), "columns": num_empty_columns(shape)})
+    
+    result = []
+    for shape_data in data:
+        for i in range(0, shape_data["rows"]-1):
+            result.append(shape_data["shape"] * (2**i))
+            for j in range(0, shape_data["columns"]-1):
+                result.append(shape_data['shape'] * (2**i) * (2**(j*6)))
+    
+    return set(result)  
+
+def print_results(results):
+    for result in results: 
+        print(result)
+    print("\n")
+
+    
+# ------ Main Function ------
+def main():
+    # Generate all possible shapes
+    l_shapes = generate_shapes(l_shape) 
+    hat_shapes = generate_shapes(hat)
+    zig_zag_shapes = generate_shapes(zig_zag)
+    straight_shapes = generate_shapes(straight)
+    cross_shapes = generate_shapes(cross)
+    cube_ish_shapes = generate_shapes(cube_ish)
+    t_shapes = generate_shapes(t_shape)
+
+    all_shapes = [l_shapes, hat_shapes, zig_zag_shapes, straight_shapes, cross_shapes, cube_ish_shapes, t_shapes]
+
+    for shape_types in all_shapes:
+        for shape in shape_types:
+            print_results(binary_to_array(shape))
+
+main()
+
+# print(generate_shapes(t_shape))
