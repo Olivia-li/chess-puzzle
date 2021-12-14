@@ -171,12 +171,11 @@ def generate_shapes(shape):
     
     result = []
     for shape_data in data:
-        for i in range(0, shape_data["rows"]-1):
-            result.append(shape_data["shape"] * (2**i))
-            for j in range(0, shape_data["columns"]-1):
-                result.append(shape_data['shape'] * (2**i) * (2**(j*6)))
+        for i in range(0, shape_data["rows"]+1):
+            for j in range(0, shape_data["columns"]+1):
+                result.append(shape_data["shape"] * (2**j) * (2**(6*i)))
     
-    return set(result)
+    return result
 
 def print_results(results):
     for result in results: 
@@ -186,23 +185,16 @@ def print_results(results):
 # ------ Main Function ------
 def main():
     # Generate all possible shapes
-    l_shapes = generate_shapes(l_shape) 
-    hat_shapes = generate_shapes(hat)
-    zig_zag_shapes = generate_shapes(zig_zag)
-    straight_shapes = generate_shapes(straight)
-    cross_shapes = generate_shapes(cross)
-    cube_ish_shapes = generate_shapes(cube_ish)
-    t_shapes = generate_shapes(t_shape)
+    all_shapes = [cross]
+    shape_combinations = []
+    for shape in all_shapes:
+        shape_combinations.append(generate_shapes(shape))
 
-    all_shapes = [l_shapes, hat_shapes, zig_zag_shapes, straight_shapes, cross_shapes, cube_ish_shapes, t_shapes]
-
+    for shape in shape_combinations:
+        for result in shape:
+            print_results(binary_to_array(result))
     result = []
     
-    # Cartesian product of all shapes
-
-    # Generate all possible boards
-
-
 
 # ------ Running the Program ------
 main()
